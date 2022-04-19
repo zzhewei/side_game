@@ -24,7 +24,8 @@ login_manager = LoginManager()
 def create_app(config_name, blueprints):
     app = Flask(__name__)
     app.config.from_object(config[config_name])
-    Swagger(app)
+    SWAGGER_TEMPLATE = {"securityDefinitions": {"APIKeyHeader": {"type": "apiKey", "name": "X-CSRFToken", "in": "header"}}}
+    Swagger(app, template=SWAGGER_TEMPLATE)
     for i in blueprints:
         import_name = import_string(i)
         app.register_blueprint(import_name)

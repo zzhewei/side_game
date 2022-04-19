@@ -111,13 +111,13 @@ class User(UserMixin, db.Model):
 class Record(db.Model):
     __tablename__ = 'record'
     rid = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(200), unique=True, nullable=False)
+    uid = db.Column(db.Integer, db.ForeignKey('user.id'))
     rank = db.Column(db.Integer, nullable=False)
     point = db.Column(db.Integer, nullable=False)
     insert_time = db.Column(db.DateTime, default=datetime.now)
-    insert_user = db.Column(db.String(10), nullable=False)
+    insert_user = db.Column(db.Integer, nullable=False)
     update_time = db.Column(db.DateTime, onupdate=datetime.now, default=datetime.now)
-    update_user = db.Column(db.String(10), nullable=False)
+    update_user = db.Column(db.Integer, nullable=False)
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)

@@ -4,7 +4,7 @@
 #           https://github.com/miguelgrinberg/flasky/blob/master/app/models.py
 #           https://hackmd.io/@shaoeChen/HJiZtEngG/https%3A%2F%2Fhackmd.io%2Fs%2Fryvr_ly8f
 ###########
-from flask_login import login_required, login_user, logout_user, current_user
+from flask_login import login_required, login_user, logout_user
 from .. import login_manager, csrf
 from ..model import User, db
 from flask import Blueprint, request, jsonify
@@ -18,34 +18,37 @@ def load_user(uid):
 
 
 @auth.route("/GetCsrf", methods=["GET"])
+@csrf.exempt
 def get_csrf():
+    """
+    取得token
+    ---
+    tags:
+      - token
+    produces: application/json
+    responses:
+      404:
+        description: Page Not Fond
+      500:
+        description: Internal Server Error
+      200:
+        description: OK
+    """
     token = generate_csrf()
-    response = jsonify({"Success": True})
-    response.headers.set("csrf_token", token)
+    response = jsonify({"Success": True, "X-CSRFToken": token})
+    print("Get token remove IP: ", request.remote_addr)
+    print(token)
+    response.headers.set("X-CSRFToken", token)
     return response
 
 
 @auth.route('/signup', methods=['POST'])
 def signup():
-    data = request.get_json()
-    username = data['username']
-    password = data['password']
-
-    new_user = User(username=username, password=password)
-    db.session.add(new_user)
-    db.session.commit()
-    data = {"code": 200, "success": "true", "data": "success"}
-    return jsonify(data)
-
-
-@auth.route("/login", methods=["POST"])
-# @csrf.exempt
-def login():
     """
-    登入
+    註冊
     ---
     tags:
-      - test
+      - auth
     parameters:
       - name: body
         in: body
@@ -59,6 +62,50 @@ def login():
               type: string
             password:
               type: string
+    security:
+      - APIKeyHeader: ['X-CSRFToken']
+    produces: application/json
+    responses:
+      404:
+        description: Page Not Fond
+      500:
+        description: Internal Server Error
+      200:
+        description: OK
+    """
+    data = request.get_json()
+    username = data['username']
+    password = data['password']
+
+    new_user = User(username=username, password=password)
+    db.session.add(new_user)
+    db.session.commit()
+    data = {"code": 200, "success": True, "data": "success"}
+    return jsonify(data)
+
+
+@auth.route("/login", methods=["POST"])
+def login():
+    """
+    登入
+    ---
+    tags:
+      - auth
+    parameters:
+      - name: body
+        in: body
+        required: true
+        schema:
+          required:
+            - username
+            - password
+          properties:
+            username:
+              type: string
+            password:
+              type: string
+    security:
+      - APIKeyHeader: ['X-CSRFToken']
     produces: application/json
     responses:
       404:
@@ -89,7 +136,7 @@ def logout():
     登出
     ---
     tags:
-      - test
+      - auth
     produces: application/json
     responses:
       404:
@@ -101,10 +148,3 @@ def logout():
     """
     logout_user()
     return jsonify({"logout": True})
-
-
-@auth.route('/session', methods=["POST"])
-def get_session():
-    if not current_user.is_authenticated:
-        return jsonify({'status': 'error'}), 401
-    return jsonify({'status': 'success', 'user': current_user.to_json()})
