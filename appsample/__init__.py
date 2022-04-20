@@ -34,6 +34,7 @@ def create_app(config_name, blueprints):
     migrate.init_app(app, db)
     csrf.init_app(app)
     login_manager.init_app(app)
+    login_manager.session_protection = 'strong'
 
     formatter = logging.Formatter("%(asctime)s [%(filename)s:%(lineno)d][%(levelname)s] - %(message)s")
     handler = TimedRotatingFileHandler("./log/event.log", when="D", interval=1, backupCount=15, encoding="UTF-8", delay=True, utc=True)
