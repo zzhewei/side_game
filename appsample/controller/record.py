@@ -96,7 +96,7 @@ def QueryRecord():
         userid = data['uid']
         current_app.logger.warning("simple page info...")
 
-        return_data = select("SELECT username, Record.rank, point, insert_time FROM Record left join user on Record.uid = user.id;")
+        return_data = select("SELECT username, Record.rank, point, insert_time FROM Record left join public.user on Record.uid = public.user.id;")
         for i, item in enumerate(return_data):
             return_data[i] = dict(item)
         data = {"code": 200, "success": True, "data": return_data}

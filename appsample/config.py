@@ -23,7 +23,9 @@ class DevelopmentConfig(BaseConfig):
     WTF_CSRF_CHECK_DEFAULT = True
     WTF_CSRF_SSL_STRICT = True
     SQLALCHEMY_TRACK_MODIFICATIONS = False
-    SQLALCHEMY_DATABASE_URI = "mysql+pymysql://root:root@localhost:3306/game"
+    # SQLALCHEMY_DATABASE_URI = "mysql+pymysql://root:root@localhost:3306/game"
+    # SQLALCHEMY_DATABASE_URI = "postgresql://postgres:root@localhost:5432/game"
+    SQLALCHEMY_DATABASE_URI = "postgresql://iedwpgwuvcgsoo:7c20b1aa2e70f510c83493bdfe07311c314e420e151b34225aabdc6c1cfad605@ec2-34-194-158-176.compute-1.amazonaws.com:5432/d6rfpl9vn6ib7m"
     # if use docker compose use this
     # SQLALCHEMY_DATABASE_URI = "mysql+pymysql://root:root@mysql:3306/tttest"
 
