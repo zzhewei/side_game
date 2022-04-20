@@ -74,10 +74,8 @@ def signup():
         description: OK
     """
     data = request.get_json()
-    username = data['username']
-    password = data['password']
 
-    new_user = User(username=username, password=password)
+    new_user = User(**data)
     db.session.add(new_user)
     db.session.commit()
     data = {"code": 200, "success": True, "data": "success"}
