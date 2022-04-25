@@ -1,6 +1,6 @@
 import json
-from flask_login import login_required
-from ..model import select, sqlOP, Permission, Record, db
+from flask_login import login_required, current_user
+from ..model import select, sqlOP, Permission, Record, db, return_format
 from flask import Blueprint, jsonify, current_app, request
 from ..decorators import permission_required
 from datetime import datetime
@@ -27,8 +27,6 @@ def Insert_Record():
             - rank
             - point
           properties:
-            uid:
-              type: integer
             rank:
               type: integer
             point:
@@ -46,21 +44,18 @@ def Insert_Record():
     """
     try:
         data = request.get_json()
-        userid = data['uid']
         rank = data['rank']
         point = data['point']
         current_app.logger.warning("Insert Record...")
-        new_user = Record(uid=userid, rank=rank, point=point, insert_time=datetime.now(), insert_user=userid, update_time=datetime.now(), update_user=userid)
+        new_user = Record(uid=current_user.get_id(), rank=rank, point=point, insert_time=datetime.now(), insert_user=current_user.get_id(), update_time=datetime.now(), update_user=current_user.get_id())
         db.session.add(new_user)
         db.session.commit()
         current_app.logger.warning("Insert Complete!")
 
-        data = {"code": 200, "success": True, "data": "success"}
+        return return_format()
     except Exception as e:
-        result = [{"errorResult": str(e)}]
-        data = {"code": 400, "success": "false", "data": result}
         current_app.logger.error("Error:", e)
-    return jsonify(data)
+        return return_format(400, False, data={"messages": str(e)})
 
 
 # query record
@@ -69,6 +64,7 @@ def Insert_Record():
 def QueryRecord():
     """
     查詢紀錄
+    全部帶0 or ""
     ---
     tags:
       - Record
@@ -93,14 +89,15 @@ def QueryRecord():
     """
     try:
         data = request.get_json()
-        userid = data['uid']
+        uid = data['uid']
         current_app.logger.warning("simple page info...")
-
-        return_data = select("SELECT username, Record.rank, point, insert_time FROM Record left join public.user on Record.uid = public.user.id;")
+        if uid:
+            return_data = select("SELECT username, Record.rank, point, insert_time FROM Record left join public.user on Record.uid = public.user.id where uid=:uid order by point desc, rank desc;", {'uid': uid})
+        else:
+            return_data = select("SELECT username, Record.rank, point, insert_time FROM Record left join public.user on Record.uid = public.user.id order by point desc, rank desc;")
         for i, item in enumerate(return_data):
             return_data[i] = dict(item)
-        data = {"code": 200, "success": True, "data": return_data}
+        return return_format(data={"data": return_data})
     except Exception as e:
-        result = [{"errorResult": str(e)}]
-        data = {"code": 400, "success": False, "data": result}
-    return jsonify(data)
+        current_app.logger.error("Error:", e)
+        return return_format(400, False, data={"messages": str(e)})

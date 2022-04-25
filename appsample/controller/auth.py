@@ -6,7 +6,7 @@
 ###########
 from flask_login import login_required, login_user, logout_user
 from .. import login_manager, csrf
-from ..model import User, db
+from ..model import User, db, return_format
 from flask import Blueprint, request, jsonify
 from flask_wtf.csrf import generate_csrf
 auth = Blueprint('auth', __name__)
@@ -35,7 +35,7 @@ def get_csrf():
         description: OK
     """
     token = generate_csrf()
-    response = jsonify({"Success": True, "X-CSRFToken": token})
+    response = jsonify({"code": 200, "success": True, "data": {"X-CSRFToken": token}})
     print("Get token remove IP: ", request.remote_addr)
     print(token)
     response.headers.set("X-CSRFToken", token)
@@ -78,8 +78,7 @@ def signup():
     new_user = User(**data)
     db.session.add(new_user)
     db.session.commit()
-    data = {"code": 200, "success": True, "data": "success"}
-    return jsonify(data)
+    return return_format()
 
 
 @auth.route("/login", methods=["POST"])
@@ -121,10 +120,9 @@ def login():
     if user:
         if user.check_password(password):
             login_user(user)
-            response = jsonify({"login": True})
-            return response
+            return return_format(data={"uid": user.id})
 
-    return jsonify({"login": False})
+    return return_format(400, False, data={"messages": "user not found"})
 
 
 @auth.route("/logout")
@@ -145,4 +143,4 @@ def logout():
         description: OK
     """
     logout_user()
-    return jsonify({"logout": True})
+    return return_format()

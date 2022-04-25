@@ -8,6 +8,7 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from datetime import datetime
 from flask_login import UserMixin
+from flask import jsonify
 from werkzeug.security import generate_password_hash, check_password_hash
 
 db = SQLAlchemy()
@@ -123,7 +124,7 @@ class Record(db.Model):
         super().__init__(**kwargs)
 
 
-def select(SqlContent, **args):
+def select(SqlContent, *args):
     data = db.session.execute(SqlContent, args)
     db.session.commit()
     return data.mappings().all()
@@ -135,3 +136,9 @@ def sqlOP(SqlContent, **args):
         db.session.commit()
     except:
         db.session.rollback()
+
+
+def return_format(code=200, success=True, data=None):
+    if data is None:
+        data = {"messages": "success"}
+    return jsonify({"code": code, "success": success, "data": data})
