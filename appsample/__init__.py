@@ -9,12 +9,11 @@ from werkzeug.utils import import_string
 from .model import db, migrate, Role
 import logging
 from logging.handlers import TimedRotatingFileHandler
-from flask_wtf.csrf import CSRFProtect
-from flask_login import LoginManager
+from flask_jwt_extended import JWTManager
+from flask_migrate import upgrade
 
 
-csrf = CSRFProtect()
-login_manager = LoginManager()
+jwt = JWTManager()
 
 
 ##########
@@ -24,7 +23,7 @@ login_manager = LoginManager()
 def create_app(config_name, blueprints):
     app = Flask(__name__)
     app.config.from_object(config[config_name])
-    SWAGGER_TEMPLATE = {"securityDefinitions": {"APIKeyHeader": {"type": "apiKey", "name": "X-CSRFToken", "in": "header"}}}
+    SWAGGER_TEMPLATE = {"securityDefinitions": {"BearerAuth": {"type": "apiKey", "name": "Authorization", "in": "header"}}}
     Swagger(app, template=SWAGGER_TEMPLATE)
     for i in blueprints:
         import_name = import_string(i)
@@ -32,17 +31,17 @@ def create_app(config_name, blueprints):
     CORS(app)
     db.init_app(app)
     migrate.init_app(app, db)
-    csrf.init_app(app)
-    login_manager.init_app(app)
-    login_manager.session_protection = 'strong'
+    jwt.init_app(app)
 
     formatter = logging.Formatter("%(asctime)s [%(filename)s:%(lineno)d][%(levelname)s] - %(message)s")
     handler = TimedRotatingFileHandler("./log/event.log", when="D", interval=1, backupCount=15, encoding="UTF-8", delay=True, utc=True)
     app.logger.addHandler(handler)
     handler.setFormatter(formatter)
 
+    @app.cli.command('init')
     @app.route("/init")
     def init():
+        upgrade()
         Role.insert_roles()
         return jsonify({"Success": True})
 

@@ -16,6 +16,10 @@ class BaseConfig:  #基本配置
         "termsOfService": "",
         "hide_top_bar": True
     }
+    # 設定 JWT 密鑰
+    JWT_SECRET_KEY = 'side_game_is_good'
+    JWT_ACCESS_TOKEN_EXPIRES = timedelta(minutes=15)
+    JWT_REFRESH_TOKEN_EXPIRES = timedelta(days=1)
 
 
 class DevelopmentConfig(BaseConfig):

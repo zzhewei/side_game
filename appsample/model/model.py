@@ -10,6 +10,7 @@ from datetime import datetime
 from flask_login import UserMixin
 from flask import jsonify
 from werkzeug.security import generate_password_hash, check_password_hash
+import time
 
 db = SQLAlchemy()
 migrate = Migrate()
@@ -79,6 +80,7 @@ class User(UserMixin, db.Model):
     role_id = db.Column(db.Integer, db.ForeignKey('roles.id'))
     username = db.Column(db.String(64), unique=True)
     password_hash = db.Column(db.String(200))
+    email = db.Column(db.String(64), unique=True, index=True)
 
     def __init__(self, **kwargs):
         # can write super(User, self).__init__(**kwargs) --> python2
@@ -112,13 +114,15 @@ class User(UserMixin, db.Model):
 class Record(db.Model):
     __tablename__ = 'record'
     rid = db.Column(db.Integer, primary_key=True)
-    uid = db.Column(db.Integer, db.ForeignKey('user.id'))
+    uid = db.Column(db.Integer)
+    player = db.Column(db.String(64), nullable=False)
     rank = db.Column(db.Integer, nullable=False)
     point = db.Column(db.Integer, nullable=False)
-    insert_time = db.Column(db.DateTime, default=datetime.now)
-    insert_user = db.Column(db.Integer, nullable=False)
-    update_time = db.Column(db.DateTime, onupdate=datetime.now, default=datetime.now)
-    update_user = db.Column(db.Integer, nullable=False)
+    survival = db.Column(db.Integer, nullable=False)
+    insert_time = db.Column(db.String(20), nullable=False, default=time.time())
+    insert_user = db.Column(db.String(64), nullable=False)
+    update_time = db.Column(db.String(20), nullable=False, onupdate=time.time(), default=time.time())
+    update_user = db.Column(db.String(64), nullable=False)
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
