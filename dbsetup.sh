@@ -7,4 +7,4 @@ done
 
 echo MySQL started
 
-exec gunicorn -b :5000 --threads 4 app:app --preload
+exec gunicorn -b :9899 --threads 4 app:app --preload
