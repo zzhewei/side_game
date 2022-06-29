@@ -1,5 +1,10 @@
 #!/usr/bin/env bash
+echo waiting for db ...
 
-python manage.py db migrate -m "first"
-python manage.py db upgrade
-python app.py
+while ! nc -z mysql 3306; do
+  sleep 0.1
+done
+
+echo MySQL started
+
+exec gunicorn -b :5000 --threads 4 app:app --preload
