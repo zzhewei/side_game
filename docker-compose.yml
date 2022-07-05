@@ -10,8 +10,8 @@ services:
     container_name: game_server
     environment:
       - APP_NAME=FlaskApp
-    ports:
-      - 9899:9899
+    expose:
+      - 9899
     depends_on:
       - db
     # entrypoint: /sample/dbsetup.sh
@@ -31,3 +31,18 @@ services:
     #資料持久化與本機共享資料夾
     #volumes:
     #  - ./sqldata:/docker-entrypoint-initdb.d
+
+  nginx:
+    build:
+      context: ./nginx
+      dockerfile: Dockerfile
+    container_name: nginx
+    restart: always
+    ports:
+      - 80:80
+      - 443:443
+    volumes:
+      - ./nginx/log:/var/log/nginx
+
+    depends_on:
+      - flask
