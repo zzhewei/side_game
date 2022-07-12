@@ -87,11 +87,17 @@ def signup():
         description: OK
     """
     data = request.get_json()
+    user = data['username']
+    email = data['email']
 
-    new_user = User(**data)
-    db.session.add(new_user)
-    db.session.commit()
-    return return_format()
+    user = User.query.filter((User.username == user) | (User.email == email)).first()
+
+    if not user:
+        new_user = User(**data)
+        db.session.add(new_user)
+        db.session.commit()
+        return return_format()
+    return return_format(400, False, data={"messages": "user or email has been used"})
 
 
 @auth.route("/login", methods=["POST"])
