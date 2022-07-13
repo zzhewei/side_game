@@ -137,7 +137,7 @@ def QueryRecord(page=1, count=10):
             else:
                 temp["username"] = i.player
             result.append(temp)
-        return return_format(data={"data": result})
+        return return_format(data=result)
     except Exception as e:
         current_app.logger.error("Error:", e)
         return return_format(400, False, data={"messages": str(e)})
