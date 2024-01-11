@@ -1,1 +1,4 @@
-log
+/nginx/log
+/log/event.log
+.idea
+__pycache__

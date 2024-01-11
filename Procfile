@@ -1,1 +1,0 @@
-web: gunicorn --threads 4 app:app --preload
